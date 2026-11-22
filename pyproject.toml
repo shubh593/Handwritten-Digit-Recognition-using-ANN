@@ -1,0 +1,19 @@
+[project]
+name = "handwritten-digit-recognition-using-ann"
+version = "0.1.0"
+description = "Handwritten Digit Recognition using Artificial Neural Networks (ANN) in TensorFlow and Keras"
+readme = "README.md"
+authors = [
+    { name = "Shubham", email = "sshinde5930@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "tensorflow>=2.21.0",
+]
+
+[project.scripts]
+handwritten-digit-recognition-using-ann = "handwritten_digit_recognition_using_ann:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
