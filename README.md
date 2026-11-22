@@ -60,8 +60,8 @@ Classifying handwritten digits is an essential benchmark in computer vision and 
 ## ✨ Key Features
 
 - **Live Drawing Canvas:** Test any digit (0–9) by drawing directly on a responsive sketchpad.
-- **Dynamic Neural Firing Map:** Visualizes signals propagating through 784 input pixels $\rightarrow$ 128 hidden neurons $\rightarrow$ 64 hidden neurons $\rightarrow$ 10 output classes.
-- **Center-of-Mass Alignment:** Preprocesses user drawings by shifting the centroid of drawn strokes to coordinate $(14, 14)$, matching the exact distribution of the original MNIST dataset.
+- **Dynamic Neural Firing Map:** Visualizes signals propagating through 784 input pixels → 128 hidden neurons → 64 hidden neurons → 10 output classes.
+- **Center-of-Mass Alignment:** Preprocesses user drawings by shifting the centroid of drawn strokes to coordinate (14, 14), matching the exact distribution of the original MNIST dataset.
 - **High Accuracy:** Reaches **97.75%** (Keras) and **98.28%** (NumPy with 300k augmented samples) on 10,000 unseen test samples.
 - **Offline Dataset Included:** Bundles `mnist.npz` directly, eliminating external download dependencies.
 - **Modern Tooling:** Built for Python 3.13+, managed with Astral's ultra-fast [`uv`](https://docs.astral.sh/uv/) environment manager.
@@ -113,18 +113,28 @@ flowchart TD
 - The pipeline inverts colors and applies a morphological `MaxFilter(size=5)` and `GaussianBlur(radius=1.5)` so user-drawn strokes retain sufficient width when scaled down.
 
 ### 2. Centering & Center-of-Mass (CoM) Alignment
-- Digits drawn off-center or in corners are cropped to their bounding box and scaled to fit within a $20 \times 20$ box.
-- The digit is placed on a $28 \times 28$ field, and `scipy.ndimage.center_of_mass` calculates $(\bar{y}, \bar{x})$.
-- The image is translated so $(\bar{y}, \bar{x})$ aligns with $(14.0, 14.0)$—the exact normalization standard used by Yann LeCun when creating MNIST.
+- Digits drawn off-center or in corners are cropped to their bounding box and scaled to fit within a 20×20 box.
+- The digit is placed on a 28×28 field, and `scipy.ndimage.center_of_mass` calculates the stroke centroid `(cy, cx)`.
+- The image is translated so `(cy, cx)` aligns with (14.0, 14.0)—the exact normalization standard used by Yann LeCun when creating MNIST.
 
 ### 3. Forward Propagation & Synaptic Firing
-- The $28 \times 28$ matrix is flattened into a 784-dimensional vector $\mathbf{x}$.
-- Layer 1 computes $\mathbf{h}_1 = \max(0, \mathbf{x} \mathbf{W}_1 + \mathbf{b}_1)$.
-- Layer 2 computes $\mathbf{h}_2 = \max(0, \mathbf{h}_1 \mathbf{W}_2 + \mathbf{b}_2)$.
-- Layer 3 produces logits $\mathbf{z}_3 = \mathbf{h}_2 \mathbf{W}_3 + \mathbf{b}_3$, normalized via Softmax:
-  $$\hat{y}_i = \frac{e^{z_{3,i}}}{\sum_{j=0}^{9} e^{z_{3,j}}}$$
-- The class with the highest probability is returned as the predicted digit:
-  $$\text{Predicted Digit} = \arg\max_{i} (\hat{y}_i)$$
+- The **28×28** matrix is flattened into a 784-dimensional input vector `x`.
+- **Layer 1:** Computes first hidden activations using ReLU:
+  ```text
+  h1 = max(0, x · W1 + b1)
+  ```
+- **Layer 2:** Computes second-level pattern combinations:
+  ```text
+  h2 = max(0, h1 · W2 + b2)
+  ```
+- **Layer 3:** Computes raw logits `z3 = h2 · W3 + b3`, transformed into class probabilities via **Softmax**:
+  ```text
+  P(class = i) = exp(z3[i]) / Σ exp(z3[j])    (for j = 0 to 9)
+  ```
+- **Classification Output:** The digit with the highest predicted probability is selected:
+  ```text
+  Predicted Digit = argmax(P(class = i))
+  ```
 
 ---
 
@@ -134,7 +144,7 @@ The models are trained and benchmarked on the **MNIST** database:
 - **Total Images:** 70,000 grayscale samples.
 - **Training Samples:** 60,000 images (augmented to **300,000 samples** via 2-pixel translational shifts in `program2.ipynb`).
 - **Testing Samples:** 10,000 unseen evaluation images.
-- **Resolution:** $28 \times 28$ pixels, normalized to $[0.0, 1.0]$.
+- **Resolution:** 28×28 pixels, normalized to [0.0, 1.0].
 - **Offline Storage:** Local `mnist.npz` and `mnist_dataset.npz` files are provided in the repository.
 
 ---
@@ -159,10 +169,10 @@ The models are trained and benchmarked on the **MNIST** database:
 
 ### 2. Pure NumPy Augmented Pipeline (`program2.ipynb`)
 
-- **Architecture:** 784 $\rightarrow$ 128 $\rightarrow$ 64 $\rightarrow$ 10 (fully implemented in vector math).
-- **Initialization:** He (Kaiming) Normal initialization ($W \sim \mathcal{N}(0, \sqrt{2 / n_{\text{in}}})$).
+- **Architecture:** 784 → 128 → 64 → 10 (fully implemented in vector math).
+- **Initialization:** He (Kaiming) Normal initialization: `W ~ Normal(0, sqrt(2 / n_in))`.
 - **Data Augmentation:** 5-fold expansion (original + 2-pixel shifts: left, right, up, down) yielding **300,000 training samples**.
-- **Optimizer:** Mini-batch SGD with **Momentum** ($\mu = 0.9$, learning rate $\alpha = 0.08$, batch size 256).
+- **Optimizer:** Mini-batch SGD with **Momentum** (momentum = 0.9, learning rate = 0.08, batch size = 256).
 - **Saved Weights:** Persisted in `mnist_weights.npz` for instant loading without retraining.
 
 ---
@@ -362,14 +372,14 @@ def classify_digit_file(image_path: str) -> int:
 
 ### 1. The model misclassifies my drawn digit
 - **Cause:** Off-center strokes or line strokes that are too thin.
-- **Solution:** Use the interactive visualizer in `program2.ipynb`, which automatically applies morphological thickening (`MaxFilter` + `GaussianBlur`) and Center-of-Mass centroid alignment to $(14, 14)$.
+- **Solution:** Use the interactive visualizer in `program2.ipynb`, which automatically applies morphological thickening (`MaxFilter` + `GaussianBlur`) and Center-of-Mass centroid alignment to (14, 14).
 
 ### 2. Dataset download timeout / `getaddrinfo failed`
 - **Cause:** Outbound internet access is blocked or offline.
 - **Solution:** Both `mnist.npz` and `mnist_dataset.npz` are already bundled locally in the repository. The scripts detect and read from local disk automatically.
 
 ### 3. Windows TensorFlow GPU notice
-- **Explanation:** Native Windows builds for TensorFlow $\ge 2.11$ run on CPU by design. Given the compact ANN parameter count (109k parameters), CPU inference takes under 1.5 ms per digit. For GPU acceleration, run inside WSL2.
+- **Explanation:** Native Windows builds for TensorFlow >= 2.11 run on CPU by design. Given the compact ANN parameter count (109k parameters), CPU inference takes under 1.5 ms per digit. For GPU acceleration, run inside WSL2.
 
 ---
 
