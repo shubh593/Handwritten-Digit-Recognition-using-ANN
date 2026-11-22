@@ -1,14 +1,20 @@
 # 🖋️ Handwritten Digit Recognition using Artificial Neural Networks (ANN)
 
-[![Python](https://img.shields.io/badge/Python-3.13%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.21%2B-FF6F00.svg?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![Keras](https://img.shields.io/badge/Keras-v3-D00000.svg?logo=keras&logoColor=white)](https://keras.io/)
-[![Dataset](https://img.shields.io/badge/Dataset-MNIST%20(70k)-4B8BBE.svg)](https://yann.lecun.com/exdb/mnist/)
-[![Test Accuracy](https://img.shields.io/badge/Test%20Accuracy-97.75%25-success.svg)](#-results--performance)
-[![Test Loss](https://img.shields.io/badge/Test%20Loss-0.0797-informational.svg)](#-results--performance)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+<p align="center">
+  <img src="image.png" alt="MNIST Live ANN Visualizer Demo" width="650" />
+</p>
 
-An end-to-end deep learning project that classifies handwritten digits (0–9) using a Multi-Layer Perceptron (Artificial Neural Network) implemented with **TensorFlow** and **Keras**. The model is trained and evaluated on the classic **MNIST** dataset, achieving **97.75% test accuracy** with low-latency CPU inference.
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.13%2B-3776AB.svg?logo=python&logoColor=white" alt="Python" /></a>
+  <a href="https://www.tensorflow.org/"><img src="https://img.shields.io/badge/TensorFlow-2.21%2B-FF6F00.svg?logo=tensorflow&logoColor=white" alt="TensorFlow" /></a>
+  <a href="https://keras.io/"><img src="https://img.shields.io/badge/Keras-v3-D00000.svg?logo=keras&logoColor=white" alt="Keras" /></a>
+  <a href="https://gradio.app/"><img src="https://img.shields.io/badge/Gradio-Interactive%20UI-FD853A.svg?logo=gradio&logoColor=white" alt="Gradio" /></a>
+  <a href="https://yann.lecun.com/exdb/mnist/"><img src="https://img.shields.io/badge/Dataset-MNIST%20(70k)-4B8BBE.svg" alt="Dataset" /></a>
+  <a href="#-results--performance"><img src="https://img.shields.io/badge/Test%20Accuracy-98.28%25-success.svg" alt="Test Accuracy" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License" /></a>
+</p>
+
+An end-to-end deep learning project that classifies handwritten digits (0–9) using Multi-Layer Perceptrons (Artificial Neural Networks). The repository provides both a **TensorFlow/Keras production training pipeline** and an **interactive Gradio application with real-time neural firing visualization**, allowing users to draw or supply handwritten digits as images and observe live forward propagation across all layers.
 
 ---
 
@@ -16,20 +22,23 @@ An end-to-end deep learning project that classifies handwritten digits (0–9) u
 
 - [Overview](#-overview)
 - [Key Features](#-key-features)
-- [System Pipeline](#-system-pipeline)
+- [Live Interactive Demonstration](#-live-interactive-demonstration)
+- [How Handwritten Image Input is Processed & Predicted](#-how-handwritten-image-input-is-processed--predicted)
+- [System Architecture & Pipeline](#-system-architecture--pipeline)
 - [Dataset Details](#-dataset-details)
-- [Model Architecture](#-model-architecture)
-- [Training & Convergence History](#-training--convergence-history)
+- [Model Architectures](#-model-architectures)
+  - [1. TensorFlow / Keras Pipeline (`program.ipynb`)](#1-tensorflow--keras-pipeline-programipynb)
+  - [2. Pure NumPy Augmented Pipeline (`program2.ipynb`)](#2-pure-numpy-augmented-pipeline-program2ipynb)
 - [Results & Performance](#-results--performance)
 - [Project Structure](#-project-structure)
 - [Installation & Setup](#-installation--setup)
   - [Option A: With `uv` (Recommended)](#option-a-using-uv-recommended)
   - [Option B: With Standard `pip` and Virtual Environment](#option-b-using-standard-pip-and-python-venv)
 - [Usage Guide](#-usage-guide)
-  - [1. Running the Interactive Notebook](#1-running-the-training-notebook)
-  - [2. Loading the Model for Batch Predictions](#2-loading-the-saved-model-for-batch-predictions)
-  - [3. Visualizing Sample Predictions with Matplotlib](#3-visualizing-predictions-with-sample-images)
-  - [4. Classifying Custom Handwritten Images (OpenCV / PIL)](#4-predicting-on-custom-handwritten-images)
+  - [1. Interactive Gradio Visualizer](#1-running-the-interactive-gradio-visualizer)
+  - [2. Training Notebook (TensorFlow/Keras)](#2-running-the-training-notebook-tensorflowkeras)
+  - [3. Batch Inference in Python](#3-batch-inference-using-the-saved-keras-model)
+  - [4. Predicting on Custom Image Files](#4-predicting-on-custom-handwritten-image-files-opencv--pil)
 - [Troubleshooting & FAQs](#-troubleshooting--faqs)
 - [Future Improvements & Roadmap](#-future-improvements--roadmap)
 - [Author & License](#-author--license)
@@ -38,152 +47,142 @@ An end-to-end deep learning project that classifies handwritten digits (0–9) u
 
 ## 🔍 Overview
 
-Classifying handwritten digits is an essential benchmark in computer vision and deep learning. This repository provides a complete, clean, and reproducible workflow:
-1. **Data Ingestion & Preprocessing:** Loads the MNIST dataset (including offline `.npz` support) and normalizes pixel intensities from $[0, 255]$ to $[0.0, 1.0]$.
-2. **ANN Architecture Design:** Flattens 2D matrices ($28 \times 28$) into 784-dimensional feature vectors, routed through dense layers with non-linear ReLU activations and Dropout regularization.
-3. **Training & Validation:** Employs the Adam optimizer and sparse categorical cross-entropy loss over 8 epochs with a 10% validation holdout.
-4. **Model Serialization:** Exports the trained model to the modern `.keras` format (`mnist_ann_model.keras`).
-5. **Reporting & Visual Analytics:** Automatically generates and saves high-resolution loss and accuracy convergence curves (`training_history.png`) for activity reports and presentations.
+Classifying handwritten digits is an essential benchmark in computer vision and deep learning. This repository delivers:
+1. **Interactive Real-Time UI:** An interactive web canvas where users draw digits with a mouse or touchscreen, instantly witnessing neural activations and classification outputs.
+2. **Robust Image Preprocessing:** Dilation, stroke thickening, bounding-box cropping, and Center-of-Mass alignment to bridge the gap between user drawings and MNIST conventions.
+3. **Dual Implementations:**
+   - **TensorFlow/Keras:** Modern Sequential model with Dropout regularization and native `.keras` serialization.
+   - **Pure NumPy ANN:** High-performance vectorized implementation trained with momentum and data augmentation (300k samples), reaching **98.28% test accuracy**.
+4. **Visual Analytics:** Real-time synaptic connectivity mapping and convergence curves (`training_history.png`) suitable for reports and presentations.
 
 ---
 
 ## ✨ Key Features
 
-- **High Accuracy:** Reaches **97.75% accuracy** and a loss of **0.0797** on 10,000 unseen test samples in just 8 epochs.
-- **Overfitting Prevention:** Incorporates a 20% Dropout layer (`rate=0.2`) between dense layers to enhance generalization on novel handwriting styles.
-- **Offline Dataset Included:** Bundles `mnist.npz` directly in the repository, enabling training and testing in offline or air-gapped environments without network download dependencies.
-- **Production-Ready Model Artifact:** Saves the full model architecture, weights, and optimizer state in the native Keras V3 format (`mnist_ann_model.keras`).
-- **Comprehensive Visualizations:** Exports publication-quality training curves comparing training vs. validation accuracy and loss.
-- **Modern Packaging:** Python 3.13+ compatible, managed via Astral's fast [`uv`](https://docs.astral.sh/uv/) package manager and standard `pyproject.toml`.
+- **Live Drawing Canvas:** Test any digit (0–9) by drawing directly on a responsive sketchpad.
+- **Dynamic Neural Firing Map:** Visualizes signals propagating through 784 input pixels $\rightarrow$ 128 hidden neurons $\rightarrow$ 64 hidden neurons $\rightarrow$ 10 output classes.
+- **Center-of-Mass Alignment:** Preprocesses user drawings by shifting the centroid of drawn strokes to coordinate $(14, 14)$, matching the exact distribution of the original MNIST dataset.
+- **High Accuracy:** Reaches **97.75%** (Keras) and **98.28%** (NumPy with 300k augmented samples) on 10,000 unseen test samples.
+- **Offline Dataset Included:** Bundles `mnist.npz` directly, eliminating external download dependencies.
+- **Modern Tooling:** Built for Python 3.13+, managed with Astral's ultra-fast [`uv`](https://docs.astral.sh/uv/) environment manager.
 
 ---
 
-## 🔄 System Pipeline
+## 🖥️ Live Interactive Demonstration
+
+When testing handwritten numbers in the application, the user draws any digit onto the canvas. The system takes this image, processes it, and generates both the classification result and a real-time visualization of the active neural pathways:
+
+<p align="center">
+  <img src="image.png" alt="Digit 0 Live Testing Output" width="650" />
+</p>
+
+<p align="center">
+  <em>Figure 1: Recognition of drawn digit <b>0</b> with live synaptic firing, active neuron states, and softmax probability distribution.</em>
+</p>
+
+<p align="center">
+  <img src="image2.png" alt="Digit Live Prediction Example" width="650" />
+</p>
+
+<p align="center">
+  <em>Figure 2: Real-time forward propagation analysis showing layer-by-layer activations and confidence bars.</em>
+</p>
+
+---
+
+## 🔬 How Handwritten Image Input is Processed & Predicted
+
+When a user writes or uploads an image of a number, the model does not just blindly read raw pixels. It follows a multi-stage computer vision and inference pipeline:
 
 ```mermaid
-flowchart LR
-    A["Raw MNIST Data<br/>(28x28 Images, 0-255)"] --> B["Normalization<br/>(float32 / 255.0)"]
-    B --> C["Flatten Layer<br/>(784 Features)"]
-    C --> D["Dense Layer 1<br/>(128 Units, ReLU)"]
-    D --> E["Dropout Layer<br/>(Rate = 0.2)"]
-    E --> F["Dense Layer 2<br/>(64 Units, ReLU)"]
-    F --> G["Output Layer<br/>(10 Units, Softmax)"]
-    G --> H["Predicted Class<br/>(Digits 0 to 9)"]
+flowchart TD
+    A["User Draws Digit on Canvas<br/>(360×360 RGB Image)"] --> B["Color Inversion<br/>(Dark ink on light canvas → White stroke on black)"]
+    B --> C["Stroke Thickening<br/>(MaxFilter size=5 + GaussianBlur r=1.5)"]
+    C --> D["Bounding Box Crop<br/>(Trims empty margins around digit)"]
+    D --> E["Aspect-Preserved Resizing<br/>(Fits digit into a 20×20 box)"]
+    E --> F["Canvas Centering (28×28)<br/>(Pastes 20×20 into 28×28 black canvas)"]
+    F --> G["Center-of-Mass Shift<br/>(Aligns digit centroid to center 14, 14)"]
+    G --> H["Pixel Normalization<br/>(Scales pixel values to [0.0, 1.0])"]
+    H --> I["ANN Forward Pass<br/>(784 → 128 ReLU → 64 ReLU → 10 Softmax)"]
+    I --> J["Final Output<br/>(Predicted Class & Confidence Score)"]
 ```
+
+### 1. Inversion & Dilation (Stroke Thickening)
+- Standard drawing pads produce **black ink on white paper** (high values on background).
+- MNIST training images consist of **white strokes on a black background** (values 0 for background, up to 255 for stroke).
+- The pipeline inverts colors and applies a morphological `MaxFilter(size=5)` and `GaussianBlur(radius=1.5)` so user-drawn strokes retain sufficient width when scaled down.
+
+### 2. Centering & Center-of-Mass (CoM) Alignment
+- Digits drawn off-center or in corners are cropped to their bounding box and scaled to fit within a $20 \times 20$ box.
+- The digit is placed on a $28 \times 28$ field, and `scipy.ndimage.center_of_mass` calculates $(\bar{y}, \bar{x})$.
+- The image is translated so $(\bar{y}, \bar{x})$ aligns with $(14.0, 14.0)$—the exact normalization standard used by Yann LeCun when creating MNIST.
+
+### 3. Forward Propagation & Synaptic Firing
+- The $28 \times 28$ matrix is flattened into a 784-dimensional vector $\mathbf{x}$.
+- Layer 1 computes $\mathbf{h}_1 = \max(0, \mathbf{x} \mathbf{W}_1 + \mathbf{b}_1)$.
+- Layer 2 computes $\mathbf{h}_2 = \max(0, \mathbf{h}_1 \mathbf{W}_2 + \mathbf{b}_2)$.
+- Layer 3 produces logits $\mathbf{z}_3 = \mathbf{h}_2 \mathbf{W}_3 + \mathbf{b}_3$, normalized via Softmax:
+  $$\hat{y}_i = \frac{e^{z_{3,i}}}{\sum_{j=0}^{9} e^{z_{3,j}}}$$
+- The class with the highest probability is returned as the predicted digit:
+  $$\text{Predicted Digit} = \arg\max_{i} (\hat{y}_i)$$
 
 ---
 
 ## 📊 Dataset Details
 
-The model is trained on the classic **MNIST** database of handwritten digits:
-- **Total Samples:** 70,000 grayscale images.
-- **Training Set:** 60,000 samples (54,000 used for training, 6,000 reserved for validation via `validation_split=0.1`).
-- **Testing Set:** 10,000 unseen samples for final evaluation.
-- **Image Resolution:** $28 \times 28$ pixels, single-channel (grayscale).
-- **Label Encoding:** Integer classes from `0` through `9`.
-- **Normalization:** Feature values scaled linearly to the interval $[0.0, 1.0]$.
+The models are trained and benchmarked on the **MNIST** database:
+- **Total Images:** 70,000 grayscale samples.
+- **Training Samples:** 60,000 images (augmented to **300,000 samples** via 2-pixel translational shifts in `program2.ipynb`).
+- **Testing Samples:** 10,000 unseen evaluation images.
+- **Resolution:** $28 \times 28$ pixels, normalized to $[0.0, 1.0]$.
+- **Offline Storage:** Local `mnist.npz` and `mnist_dataset.npz` files are provided in the repository.
 
 ---
 
-## 🧠 Model Architecture
+## 🧠 Model Architectures
 
-The model is a Feedforward Artificial Neural Network (Multilayer Perceptron):
+### 1. TensorFlow / Keras Pipeline (`program.ipynb`)
 
-```
-┌────────────────────────────────────────────────────────┐
-│  INPUT: 28x28 Grayscale Matrix                         │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│  FLATTEN: Vector shape = (None, 784)                   │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│  HIDDEN LAYER 1: Dense (128 units, ReLU activation)    │
-│  Weights: 784 × 128 + 128 biases = 100,480 params      │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│  DROPOUT: Regularization (rate = 0.2)                  │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│  HIDDEN LAYER 2: Dense (64 units, ReLU activation)     │
-│  Weights: 128 × 64 + 64 biases = 8,256 params          │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│  OUTPUT LAYER: Dense (10 units, Softmax activation)    │
-│  Weights: 64 × 10 + 10 biases = 650 params             │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│  OUTPUT: Probability distribution across digits 0–9    │
-└────────────────────────────────────────────────────────┘
-```
+| Layer | Type | Output Shape | Parameters | Activation | Function |
+| :---: | :--- | :---: | :---: | :---: | :--- |
+| **0** | `Input` | `(None, 28, 28)` | 0 | - | Accepts raw 28×28 grayscale images |
+| **1** | `Flatten` | `(None, 784)` | 0 | - | Unrolls 2D image into 1D vector |
+| **2** | `Dense_1` | `(None, 128)` | 100,480 | ReLU | Primary feature extraction |
+| **3** | `Dropout` | `(None, 128)` | 0 | - | Prevents overfitting (rate = 0.2) |
+| **4** | `Dense_2` | `(None, 64)` | 8,256 | ReLU | High-level pattern combination |
+| **5** | `Dense_3` | `(None, 10)` | 650 | Softmax | Probability distribution across digits 0–9 |
 
-### Layer Specification Table
-
-| Layer # | Layer Name | Layer Type | Output Shape | Param # | Activation | Purpose |
-| :---: | :--- | :--- | :---: | :---: | :---: | :--- |
-| **0** | `input_layer` | Input | `(None, 28, 28)` | 0 | - | Raw 2D image matrix input |
-| **1** | `flatten` | Flatten | `(None, 784)` | 0 | - | Unrolls 2D image into 1D vector |
-| **2** | `Hidden_Layer_1` | Dense | `(None, 128)` | 100,480 | ReLU | Primary feature extraction |
-| **3** | `dropout` | Dropout | `(None, 128)` | 0 | - | Regularization (prevents co-adaptation) |
-| **4** | `Hidden_Layer_2` | Dense | `(None, 64)` | 8,256 | ReLU | Intermediate high-level representation |
-| **5** | `Output_Layer` | Dense | `(None, 10)` | 650 | Softmax | Class probabilities (sum to 1.0) |
-
-- **Total Parameters:** 109,386 (427.29 KB)
-- **Trainable Parameters:** 109,386
-- **Non-trainable Parameters:** 0
-- **Loss Function:** `sparse_categorical_crossentropy`
-- **Optimizer:** `Adam` ($\beta_1=0.9, \beta_2=0.999, \epsilon=10^{-7}$)
-- **Batch Size:** 32
-- **Training Epochs:** 8
+- **Total Parameters:** 109,386 (all trainable)
+- **Loss:** `sparse_categorical_crossentropy` | **Optimizer:** `Adam` | **Batch Size:** 32 | **Epochs:** 8
 
 ---
 
-## 📈 Training & Convergence History
+### 2. Pure NumPy Augmented Pipeline (`program2.ipynb`)
 
-The network was trained across 8 epochs with the following monitored metrics per epoch:
-
-| Epoch | Training Loss | Training Accuracy | Validation Loss | Validation Accuracy | Epoch Duration |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | 0.2983 | 91.15% | 0.1108 | 96.85% | ~13s |
-| **2** | 0.1408 | 95.65% | 0.0842 | 97.63% | ~17s |
-| **3** | 0.1072 | 96.64% | 0.0756 | 97.68% | ~9s |
-| **4** | 0.0906 | 97.16% | 0.0711 | 98.00% | ~8s |
-| **5** | 0.0780 | 97.56% | 0.0696 | 98.03% | ~9s |
-| **6** | 0.0656 | 97.94% | 0.0621 | 98.13% | ~22s |
-| **7** | 0.0633 | 97.95% | 0.0693 | 97.98% | ~21s |
-| **8** | 0.0568 | 98.17% | 0.0777 | 97.78% | ~14s |
-
-### Convergence Plots
-
-The training pipeline visualizes accuracy gains and loss reduction over all epochs:
-
-![Training and Validation History](training_history.png)
-
-*Figure: Dual subplots showing training vs. validation accuracy (left) and training vs. validation loss (right).*
+- **Architecture:** 784 $\rightarrow$ 128 $\rightarrow$ 64 $\rightarrow$ 10 (fully implemented in vector math).
+- **Initialization:** He (Kaiming) Normal initialization ($W \sim \mathcal{N}(0, \sqrt{2 / n_{\text{in}}})$).
+- **Data Augmentation:** 5-fold expansion (original + 2-pixel shifts: left, right, up, down) yielding **300,000 training samples**.
+- **Optimizer:** Mini-batch SGD with **Momentum** ($\mu = 0.9$, learning rate $\alpha = 0.08$, batch size 256).
+- **Saved Weights:** Persisted in `mnist_weights.npz` for instant loading without retraining.
 
 ---
 
 ## 🏆 Results & Performance
 
-Evaluation conducted on the 10,000 unseen samples of the MNIST test dataset:
+| Implementation | Training Set Size | Epochs | Test Accuracy | Test Loss | Inference Time |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Keras ANN (`program.ipynb`)** | 60,000 | 8 | **97.75%** | 0.0797 | ~1.2 ms |
+| **NumPy Augmented ANN (`program2.ipynb`)** | 300,000 | 12 | **98.28%** | 0.0263 | ~0.8 ms |
 
-| Evaluation Metric | Measured Value | Target Benchmark |
-| :--- | :---: | :---: |
-| **Test Accuracy** | **97.75%** | $> 95.00\%$ |
-| **Test Loss** | **0.0797** | $< 0.1000$ |
-| **Inference Time (CPU)** | **< 1.5 ms / sample** | $< 10.0$ ms |
-| **Model Size on Disk** | **~1.34 MB** | $< 5.0$ MB |
+### Convergence Plots
+
+<p align="center">
+  <img src="training_history.png" alt="Training History Plots" width="650" />
+</p>
+
+<p align="center">
+  <em>Figure 3: Training vs. validation accuracy and loss across 8 epochs (Keras).</em>
+</p>
 
 ---
 
@@ -191,19 +190,23 @@ Evaluation conducted on the 10,000 unseen samples of the MNIST test dataset:
 
 ```plaintext
 Handwritten-Digit-Recognition-using-ANN/
-├── .gitignore                     # Git ignore rules for virtualenvs, caches, and build artifacts
+├── .gitignore                     # Git ignore rules
 ├── LICENSE                        # Apache License 2.0
-├── README.md                      # Project documentation and user guide
-├── pyproject.toml                 # Project metadata, build system, and dependencies
+├── README.md                      # Complete project documentation
+├── pyproject.toml                 # Dependencies and packaging metadata
 ├── uv.lock                        # Deterministic dependency lockfile
-├── mnist.npz                      # Offline MNIST dataset archive (train/test arrays)
-├── mnist_ann_model.keras          # Serialized trained ANN model (Keras V3 format)
-├── training_history.png           # High-resolution convergence plot (accuracy & loss)
-├── program.ipynb                  # Primary Jupyter notebook containing the full workflow
-├── program2.ipynb                 # Scratchpad / secondary notebook for experiments
+├── mnist.npz                      # Offline MNIST dataset archive
+├── mnist_dataset.npz              # Direct dataset copy for NumPy pipeline
+├── mnist_ann_model.keras          # Trained Keras model artifact
+├── mnist_weights.npz              # Trained pure NumPy weights (W1, b1, W2, b2, W3, b3)
+├── image.png                      # Screenshot: Live UI testing digit 0
+├── image2.png                     # Screenshot: Live UI testing digit prediction
+├── training_history.png           # Accuracy and loss convergence curves
+├── program.ipynb                  # TensorFlow/Keras training & evaluation notebook
+├── program2.ipynb                 # Gradio interactive visualizer & pure NumPy ANN
 └── src/
     └── handwritten_digit_recognition_using_ann/
-        └── __init__.py            # Python package entry point
+        └── __init__.py            # Package entry point
 ```
 
 ---
@@ -211,42 +214,37 @@ Handwritten-Digit-Recognition-using-ANN/
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
-- Python **3.13+** (also backward-compatible with Python 3.10 – 3.12)
+- Python **3.13+** (backward-compatible with 3.10 – 3.12)
 - Git
 
 ### Option A: Using `uv` (Recommended)
 
-[`uv`](https://github.com/astral-sh/uv) is an extremely fast Python package and environment manager.
-
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/sshinde5930/Handwritten-Digit-Recognition-using-ANN.git
    cd Handwritten-Digit-Recognition-using-ANN
    ```
 
-2. **Sync the project dependencies into an isolated virtual environment:**
+2. **Sync dependencies:**
    ```bash
    uv sync
    ```
 
-3. **Start Jupyter Lab or Notebook:**
+3. **Install UI and image processing packages:**
+   ```bash
+   uv add gradio pillow scipy matplotlib
+   ```
+
+4. **Launch Jupyter:**
    ```bash
    uv run jupyter lab
-   # or
-   uv run jupyter notebook
    ```
 
 ### Option B: Using Standard `pip` and Python `venv`
 
-1. **Clone the repository:**
+1. **Create and activate a virtual environment:**
    ```bash
-   git clone https://github.com/sshinde5930/Handwritten-Digit-Recognition-using-ANN.git
-   cd Handwritten-Digit-Recognition-using-ANN
-   ```
-
-2. **Create and activate a virtual environment:**
-   ```bash
-   # Windows (Command Prompt / PowerShell)
+   # Windows
    python -m venv .venv
    .\.venv\Scripts\activate
 
@@ -255,105 +253,70 @@ Handwritten-Digit-Recognition-using-ANN/
    source .venv/bin/activate
    ```
 
-3. **Install the required dependencies:**
+2. **Install requirements:**
    ```bash
-   pip install tensorflow>=2.21.0 matplotlib numpy jupyterlab
+   pip install tensorflow>=2.21.0 matplotlib numpy jupyterlab gradio pillow scipy
    ```
 
 ---
 
 ## 🚀 Usage Guide
 
-### 1. Running the Training Notebook
+### 1. Running the Interactive Gradio Visualizer
 
-Open `program.ipynb` in VS Code or Jupyter:
-- Step 1: Import TensorFlow, NumPy, and Matplotlib.
-- Step 2: Load the MNIST dataset (automatically reads or downloads `mnist.npz`).
-- Step 3: Rescale image arrays to `float32` in the range $[0.0, 1.0]$.
-- Step 4: Define the Sequential ANN model architecture with Flatten, Dense, and Dropout layers.
-- Step 5: Compile with Adam and `sparse_categorical_crossentropy`.
-- Step 6: Train with `epochs=8, batch_size=32, validation_split=0.1`.
-- Step 7: Evaluate test accuracy and loss.
-- Step 8: Save the model to `mnist_ann_model.keras` and plot to `training_history.png`.
+Open `program2.ipynb` in VS Code or Jupyter Lab, and run all cells. Alternatively, launch it via script:
+
+```bash
+uv run python -c "import jupyter; print('Open program2.ipynb and execute all cells to launch the UI!')"
+```
+
+Once running, the interface opens locally at:
+👉 **`http://127.0.0.1:7861`** (or `http://127.0.0.1:7860`)
+
+- Draw any digit from **0 to 9** on the left sketchpad.
+- Click **Predict & Visualize** (or simply finish your stroke).
+- View the real-time classification banner and live synaptic firing map on the right panel.
 
 ---
 
-### 2. Loading the Saved Model for Batch Predictions
+### 2. Running the Training Notebook (TensorFlow/Keras)
 
-You can load `mnist_ann_model.keras` in any Python script without retraining:
+Open and execute `program.ipynb` sequentially to:
+1. Load and normalize MNIST.
+2. Build the Sequential ANN with Dropout.
+3. Train over 8 epochs with Adam.
+4. Export `mnist_ann_model.keras` and `training_history.png`.
+
+---
+
+### 3. Batch Inference Using the Saved Keras Model
 
 ```python
 import numpy as np
 import tensorflow as tf
 
-# 1. Load the trained model
+# Load serialized model
 model = tf.keras.models.load_model("mnist_ann_model.keras")
 
-# 2. Load the dataset from local mnist.npz
-data = np.load("mnist.npz")
-x_test, y_test = data["x_test"], data["y_test"]
-
-# 3. Preprocess images
-x_test_norm = x_test.astype("float32") / 255.0
-
-# 4. Run inference on test samples
-test_subset = x_test_norm[:10]
-predictions = model.predict(test_subset)
-predicted_classes = np.argmax(predictions, axis=1)
-
-print("Predicted classes:", predicted_classes)
-print("True ground truth:", y_test[:10])
-
-# 5. Quick Accuracy Check on the batch
-batch_acc = np.mean(predicted_classes == y_test[:10]) * 100
-print(f"Batch Sample Accuracy: {batch_acc:.1f}%")
-```
-
----
-
-### 3. Visualizing Predictions with Sample Images
-
-Use this code to plot test digits alongside their predicted labels and probabilities:
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import tensorflow as tf
-
-model = tf.keras.models.load_model("mnist_ann_model.keras")
+# Load local test samples
 data = np.load("mnist.npz")
 x_test, y_test = data["x_test"], data["y_test"]
 x_test_norm = x_test.astype("float32") / 255.0
 
-# Predict on 15 random test samples
-indices = np.random.choice(len(x_test), 15, replace=False)
-samples = x_test_norm[indices]
-preds = model.predict(samples)
+# Predict on first 10 test images
+preds = model.predict(x_test_norm[:10])
+predicted_labels = np.argmax(preds, axis=1)
 
-plt.figure(figsize=(12, 6))
-for i, idx in enumerate(indices):
-    pred_digit = np.argmax(preds[i])
-    true_digit = y_test[idx]
-    confidence = preds[i][pred_digit] * 100
-
-    plt.subplot(3, 5, i + 1)
-    plt.imshow(x_test[idx], cmap="gray")
-    color = "green" if pred_digit == true_digit else "red"
-    plt.title(f"Pred: {pred_digit} ({confidence:.1f}%)\nTrue: {true_digit}", color=color)
-    plt.axis("off")
-
-plt.tight_layout()
-plt.show()
+print("Predicted:", predicted_labels)
+print("Actual:   ", y_test[:10])
+print(f"Sample Accuracy: {np.mean(predicted_labels == y_test[:10]) * 100:.1f}%")
 ```
 
 ---
 
-### 4. Predicting on Custom Handwritten Images
+### 4. Predicting on Custom Handwritten Image Files (OpenCV / PIL)
 
-When classifying your own handwritten digits drawn on paper or in a graphics program (e.g., Paint):
-
-> [!TIP]
-> MNIST digits are **white strokes on a black background**. If your input image is dark ink on white paper, you must invert the colors (using `255 - img` or `cv2.bitwise_not`).
+To classify custom photos or scanned digits from files:
 
 ```python
 import cv2
@@ -363,82 +326,59 @@ import tensorflow as tf
 model = tf.keras.models.load_model("mnist_ann_model.keras")
 
 
-def classify_digit(image_path: str) -> int:
-    """Loads a custom image, preprocesses it to 28x28 grayscale,
-
-    inverts polarity if necessary, and returns the predicted digit.
-    """
-    # 1. Read image as grayscale
+def classify_digit_file(image_path: str) -> int:
+    """Classifies an external digit image file."""
+    # 1. Read as grayscale
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        raise FileNotFoundError(f"Could not load image at '{image_path}'")
+        raise FileNotFoundError(f"Image not found at {image_path}")
 
-    # 2. Resize to MNIST standard dimensions (28x28)
+    # 2. Resize to 28x28
     img_resized = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
 
-    # 3. Invert if background is light (mean brightness > 127)
+    # 3. Invert if background is light
     if np.mean(img_resized) > 127:
         img_resized = cv2.bitwise_not(img_resized)
 
-    # 4. Normalize pixel intensity to [0.0, 1.0]
-    img_normalized = img_resized.astype("float32") / 255.0
+    # 4. Normalize to [0, 1]
+    img_norm = img_resized.astype("float32") / 255.0
+    input_tensor = np.expand_dims(img_norm, axis=0)
 
-    # 5. Reshape to model input shape (1, 28, 28)
-    input_tensor = np.expand_dims(img_normalized, axis=0)
+    # 5. Predict
+    probs = model.predict(input_tensor, verbose=0)[0]
+    digit = int(np.argmax(probs))
+    confidence = float(probs[digit]) * 100
 
-    # 6. Predict
-    prediction = model.predict(input_tensor, verbose=0)[0]
-    predicted_digit = int(np.argmax(prediction))
-    confidence = float(prediction[predicted_digit]) * 100.0
-
-    print(f"Result -> Digit: {predicted_digit} | Confidence: {confidence:.2f}%")
-    return predicted_digit
+    print(f"File: {image_path} -> Predicted Digit: {digit} ({confidence:.2f}%)")
+    return digit
 
 
-# Example usage:
-# digit = classify_digit("sample_digit.png")
+# classify_digit_file("my_digit.png")
 ```
 
 ---
 
 ## ❓ Troubleshooting & FAQs
 
-### 1. `getaddrinfo failed` when loading MNIST
-- **Cause:** Keras tries to download `mnist.npz` from Google Cloud Storage, but the environment is offline or has restricted outbound internet access.
-- **Solution:** The dataset is already stored locally as `mnist.npz`. Load it directly with NumPy:
-  ```python
-  import numpy as np
+### 1. The model misclassifies my drawn digit
+- **Cause:** Off-center strokes or line strokes that are too thin.
+- **Solution:** Use the interactive visualizer in `program2.ipynb`, which automatically applies morphological thickening (`MaxFilter` + `GaussianBlur`) and Center-of-Mass centroid alignment to $(14, 14)$.
 
-  data = np.load("mnist.npz")
-  x_train, y_train = data["x_train"], data["y_train"]
-  x_test, y_test = data["x_test"], data["y_test"]
-  ```
+### 2. Dataset download timeout / `getaddrinfo failed`
+- **Cause:** Outbound internet access is blocked or offline.
+- **Solution:** Both `mnist.npz` and `mnist_dataset.npz` are already bundled locally in the repository. The scripts detect and read from local disk automatically.
 
-### 2. Windows Native GPU Warning
-- **Message:** `TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11.`
-- **Explanation:** Starting with TensorFlow 2.11, native Windows builds only support CPU execution.
-- **Remedy:** For this ANN architecture, CPU training is fast (~10 seconds per epoch). If GPU acceleration is required, run TensorFlow inside **WSL2 (Windows Subsystem for Linux)** with the NVIDIA CUDA toolkit.
-
-### 3. oneDNN Floating-Point Round-Off Notice
-- **Message:** `oneDNN custom operations are on...`
-- **Explanation:** This is an informational notice from TensorFlow indicating that Intel/AMD optimized CPU math routines are enabled. To suppress it, set the environment variable:
-  ```bash
-  # Windows PowerShell
-  $env:TF_ENABLE_ONEDNN_OPTS="0"
-
-  # Linux / macOS
-  export TF_ENABLE_ONEDNN_OPTS=0
-  ```
+### 3. Windows TensorFlow GPU notice
+- **Explanation:** Native Windows builds for TensorFlow $\ge 2.11$ run on CPU by design. Given the compact ANN parameter count (109k parameters), CPU inference takes under 1.5 ms per digit. For GPU acceleration, run inside WSL2.
 
 ---
 
 ## 🔮 Future Improvements & Roadmap
 
-- [ ] **Convolutional Neural Network (CNN):** Add a CNN baseline (`Conv2D` + `MaxPooling2D`) to capture spatial features and raise accuracy above **99.2%**.
-- [ ] **Interactive Web UI:** Deploy a **Gradio** or **Streamlit** interactive drawing canvas where users can draw digits directly and view live softmax probability bars.
-- [ ] **Model Quantization (TFLite & ONNX):** Convert `mnist_ann_model.keras` to TensorFlow Lite (`.tflite`) and ONNX formats for edge devices and mobile deployment.
-- [ ] **Data Augmentation:** Integrate `tf.keras.layers.RandomRotation` and `RandomTranslation` to improve robustness against off-center and tilted handwriting.
-- [ ] **Confusion Matrix Analysis:** Plot a $10 \times 10$ Seaborn heatmap to examine common misclassifications (e.g., distinguishing between 4 and 9, or 3 and 5).
+- [ ] **Convolutional Neural Network (CNN):** Add a Conv2D architecture to evaluate spatial feature representations and push test accuracy above **99.2%**.
+- [ ] **Web Deployment:** Host the Gradio visualizer on **Hugging Face Spaces** for zero-setup public browser access.
+- [ ] **Mobile & Edge Export:** Convert the network to **TensorFlow Lite (`.tflite`)** and **ONNX** formats for embedded mobile digit classification.
+- [ ] **Confusion Matrix Heatmap:** Add a Seaborn correlation matrix highlighting common digit boundary ambiguities (e.g., distinguishing 4 vs. 9, or 3 vs. 5).
 
 ---
 
@@ -446,4 +386,5 @@ def classify_digit(image_path: str) -> int:
 
 - **Author:** Shubham ([@sshinde5930](https://github.com/sshinde5930))
 - **Email:** [sshinde5930@gmail.com](mailto:sshinde5930@gmail.com)
+- **Institution:** Zeal College of Engineering & Research | Dept. of AI & DS
 - **License:** Distributed under the [Apache 2.0 License](LICENSE).
